@@ -4,7 +4,6 @@ import org.autodrivingcar.model.Command;
 import org.autodrivingcar.simulation.SimulationManager;
 import org.autodrivingcar.model.Car;
 import org.autodrivingcar.model.Direction;
-import org.autodrivingcar.utils.StringFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

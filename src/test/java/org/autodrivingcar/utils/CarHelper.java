@@ -9,7 +9,7 @@ import java.util.List;
 
 public class CarHelper {
     public static List<Car> generateSampleCarList() {
-        List<Car> carList = new ArrayList<Car>();
+        List<Car> carList = new ArrayList<>();
 
         Car car1 = new Car("TestCar1", 1, 2, Direction.N, new Command[]{Command.F, Command.F});
         carList.add(car1);
