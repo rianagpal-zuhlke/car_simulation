@@ -64,6 +64,19 @@ public class CarPrinterTest {
     }
 
     @Test
+    public void testPrintingOfInvalidFieldConfiguration() {
+        carPrinter.printInvalidFieldConfiguration();
+
+        String expectedOutput = """
+                Width and height must be greater than zero. Please enter valid values:
+                """;
+
+        String actualOutput = StringFormatter.normalizeLineSeparators(outputStream.toString().strip());
+
+        assertEquals(expectedOutput.strip(), actualOutput);
+    }
+
+    @Test
     public void testAskForCarName() {
         carPrinter.askForCarName();
 

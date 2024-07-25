@@ -32,6 +32,10 @@ public class CarPrinter {
         out.printf("\nYou have created a field of %d x %d.\n%n", fieldWidth, fieldHeight);
     }
 
+    public void printInvalidFieldConfiguration() {
+        out.println("Width and height must be greater than zero. Please enter valid values:");
+    }
+
     public void askForCarName() {
         out.println("Please enter the name of the car:");
     }

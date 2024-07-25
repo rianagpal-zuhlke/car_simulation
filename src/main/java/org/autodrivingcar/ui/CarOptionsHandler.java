@@ -22,8 +22,19 @@ public class CarOptionsHandler {
     public void configureField(SimulationManager simulationManager) {
         carPrinter.printWelcomeMessage();
 
-        int width = scanner.nextInt();
-        int height = scanner.nextInt();
+        int width;
+        int height;
+
+        while (true) {
+            width = scanner.nextInt();
+            height = scanner.nextInt();
+
+            if (width > 0 && height > 0) {
+                break;
+            } else {
+                carPrinter.printInvalidFieldConfiguration();
+            }
+        }
 
         simulationManager.configureField(width, height);
         scanner.nextLine();
@@ -53,5 +64,4 @@ public class CarOptionsHandler {
                 .map(Command::valueOf)
                 .toArray(Command[]::new);
     }
-
 }

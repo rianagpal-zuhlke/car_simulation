@@ -29,7 +29,7 @@ public class CarOptionsHandlerTest {
     }
 
     @Test
-    public void testConfigureField() {
+    public void testConfigureValidField() {
         String input = "10 20\n";
         ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes());
         Scanner scanner = new Scanner(inputStream);
@@ -52,6 +52,30 @@ public class CarOptionsHandlerTest {
 
         assertEquals(10, testSimulationManager.getFieldWidth());
         assertEquals(20, testSimulationManager.getFieldHeight());
+    }
+
+    @Test
+    public void testConfigureInValidField() {
+        String input = "0 0\n10 20\n";
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes());
+        Scanner scanner = new Scanner(inputStream);
+
+        CarOptionsHandler carOptionsHandler = new CarOptionsHandler(scanner, printStream);
+
+        carOptionsHandler.configureField(testSimulationManager);
+
+        String expectedOutput = """
+                Welcome to Auto Driving Car Simulation!
+                Please enter the width and height of the simulation field in x y format:\s
+                Width and height must be greater than zero. Please enter valid values:
+                
+                You have created a field of 10 x 20.
+                """;
+        expectedOutput = StringFormatter.normalizeLineSeparators(expectedOutput.strip());
+
+        String actualOutput = StringFormatter.normalizeLineSeparators(outputStream.toString().strip());
+
+        assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
