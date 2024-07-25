@@ -1,6 +1,7 @@
 package org.autodrivingcar.simulation;
 
-import org.autodrivingcar.model.Field;
+import org.autodrivingcar.model.Command;
+import org.autodrivingcar.utils.StringFormatter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.autodrivingcar.model.Car;
@@ -12,54 +13,46 @@ import java.io.PrintStream;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CarSimulationRunnerTest {
+    private ByteArrayOutputStream outputStream;
     private CarSimulationRunner simulationRunner;
-    private CarManager carManager;
-    private Field field;
+    private SimulationManager testSimulationManager;
 
     @BeforeEach
     void setUp() {
-        simulationRunner = new CarSimulationRunner();
-        carManager = new CarManager();
-        field = new Field(10,10);
+        outputStream = new ByteArrayOutputStream();
+        simulationRunner = new CarSimulationRunner(new PrintStream(outputStream));
+        testSimulationManager = new SimulationManager(new PrintStream(outputStream));
     }
 
     @Test
     void testRunCarSimulation_NoCollision() {
+        Car car1 = new Car("TestCar1", 0, 0, Direction.N, new Command[]{Command.F});
+        Car car2 = new Car("TestCar2", 1, 0, Direction.E, new Command[]{Command.F});
+        testSimulationManager.addCar(car1);
+        testSimulationManager.addCar(car2);
+        testSimulationManager.configureField(10,10);
 
-        Car car1 = new Car("TestCar1", 0, 0, Direction.N, "F");
-        Car car2 = new Car("TestCar2", 1, 0, Direction.E, "F");
+        simulationRunner.runCarSimulation(testSimulationManager);
 
-        carManager.addCar(car1);
-        carManager.addCar(car2);
-
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
-
-        simulationRunner.runCarSimulation(carManager, field);
-
-        String output = outContent.toString();
-
-        assertTrue(output.contains("TestCar1, (0,1) N"));
-        assertTrue(output.contains("TestCar2, (2,0) E"));
+        String actualOutput = StringFormatter.normalizeLineSeparators(outputStream.toString().strip());
+        assertTrue(actualOutput.contains("TestCar1, (0,1) N"));
+        assertTrue(actualOutput.contains("TestCar2, (2,0) E"));
     }
 
     @Test
     void testRunCarSimulation_WithCollision() {
 
-        Car car1 = new Car("TestCar1", 1, 1, Direction.N, "F");
-        Car car2 = new Car("TestCar2", 1, 3, Direction.S, "F");
+        Car car1 = new Car("TestCar1", 1, 1, Direction.N, new Command[]{Command.F});
+        Car car2 = new Car("TestCar2", 1, 3, Direction.S, new Command[]{Command.F});
 
-        carManager.addCar(car1);
-        carManager.addCar(car2);
+        testSimulationManager.addCar(car1);
+        testSimulationManager.addCar(car2);
+        testSimulationManager.configureField(10,10);
 
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
+        simulationRunner.runCarSimulation(testSimulationManager);
 
-        simulationRunner.runCarSimulation(carManager, field);
-
-        String output = outContent.toString();
-
-        assertTrue(output.contains("TestCar1, collides with TestCar2 at (1,2) at step 1"));
-        assertTrue(output.contains("TestCar2, collides with TestCar1 at (1,2) at step 1"));
+        String actualOutput = StringFormatter.normalizeLineSeparators(outputStream.toString().strip());
+        assertTrue(actualOutput.contains("TestCar1, collides with TestCar2 at (1,2) at step 1"));
+        assertTrue(actualOutput.contains("TestCar2, collides with TestCar1 at (1,2) at step 1"));
     }
 }

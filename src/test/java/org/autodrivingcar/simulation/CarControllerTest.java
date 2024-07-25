@@ -1,5 +1,6 @@
 package org.autodrivingcar.simulation;
 
+import org.autodrivingcar.model.Command;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.autodrivingcar.model.Car;
@@ -12,87 +13,134 @@ public class CarControllerTest {
 
     @BeforeEach
     void setUp() {
-        carController = new CarController();
+        carController = new CarController(10, 10);
     }
 
     @Test
-    void testRotateLeft() {
-        Car car = new Car("TestCar", 1, 4, Direction.N, "L");
-        carController.executeCarCommand(car, 'L', 10, 10);
+    void testRotateLeftFromNorth() {
+        Car car = new Car("TestCar", 1, 4, Direction.N, new Command[]{Command.L});
+        carController.executeCarCommand(car, Command.L);
         assertEquals(Direction.W, car.getDirection());
+    }
 
-        carController.executeCarCommand(car, 'L', 10, 10);
-        assertEquals(Direction.S, car.getDirection());
-
-        carController.executeCarCommand(car, 'L', 10, 10);
-        assertEquals(Direction.E, car.getDirection());
-
-        carController.executeCarCommand(car, 'L', 10, 10);
+    @Test
+    void testRotateLeftFromEast() {
+        Car car = new Car("TestCar", 1, 4, Direction.E, new Command[]{Command.L});
+        carController.executeCarCommand(car, Command.L);
         assertEquals(Direction.N, car.getDirection());
     }
 
     @Test
-    void testRotateRight() {
-        Car car = new Car("TestCar", 1, 4, Direction.N, "R");
-
-        carController.executeCarCommand(car, 'R', 10, 10);
+    void testRotateLeftFromSouth() {
+        Car car = new Car("TestCar", 1, 4, Direction.S, new Command[]{Command.L});
+        carController.executeCarCommand(car, Command.L);
         assertEquals(Direction.E, car.getDirection());
+    }
 
-        carController.executeCarCommand(car, 'R', 10, 10);
+    @Test
+    void testRotateLeftFromWest() {
+        Car car = new Car("TestCar", 1, 4, Direction.W, new Command[]{Command.L});
+        carController.executeCarCommand(car, Command.L);
         assertEquals(Direction.S, car.getDirection());
+    }
 
-        carController.executeCarCommand(car, 'R', 10, 10);
+    @Test
+    void testRotateRightFromNorth() {
+        Car car = new Car("TestCar", 1, 4, Direction.N, new Command[]{Command.R});
+        carController.executeCarCommand(car, Command.R);
+        assertEquals(Direction.E, car.getDirection());
+    }
+
+    @Test
+    void testRotateRightFromSouth() {
+        Car car = new Car("TestCar", 1, 4, Direction.S, new Command[]{Command.R});
+        carController.executeCarCommand(car, Command.R);
         assertEquals(Direction.W, car.getDirection());
+    }
 
-        carController.executeCarCommand(car, 'R', 10, 10);
+    @Test
+    void testRotateRightFromEast() {
+        Car car = new Car("TestCar", 1, 4, Direction.E, new Command[]{Command.R});
+        carController.executeCarCommand(car, Command.R);
+        assertEquals(Direction.S, car.getDirection());
+    }
+
+    @Test
+    void testRotateRightFromWest() {
+        Car car = new Car("TestCar", 1, 4, Direction.W, new Command[]{Command.R});
+        carController.executeCarCommand(car, Command.R);
         assertEquals(Direction.N, car.getDirection());
     }
 
     @Test
-    void testMoveForward() {
-        Car car = new Car("TestCar", 2, 2, Direction.N, "F");
+    void testMoveForwardFromNorth() {
+        Car car = new Car("TestCar", 1, 4, Direction.N, new Command[]{Command.F});
+        carController.executeCarCommand(car, Command.F);
+        assertEquals(1, car.getX());
+        assertEquals(5, car.getY());
+        assertEquals(Direction.N, car.getDirection());
+    }
 
-        carController.executeCarCommand(car, 'F', 10, 10);
+    @Test
+    void testMoveForwardFromSouth() {
+        Car car = new Car("TestCar", 1, 4, Direction.S, new Command[]{Command.F});
+        carController.executeCarCommand(car, Command.F);
+        assertEquals(1, car.getX());
+        assertEquals(3, car.getY());
+        assertEquals(Direction.S, car.getDirection());
+    }
+
+    @Test
+    void testMoveForwardFromEast() {
+        Car car = new Car("TestCar", 1, 4, Direction.E, new Command[]{Command.F});
+        carController.executeCarCommand(car, Command.F);
         assertEquals(2, car.getX());
-        assertEquals(3, car.getY());
-
-        car.setDirection(Direction.E);
-        carController.executeCarCommand(car, 'F', 10, 10);
-        assertEquals(3, car.getX());
-        assertEquals(3, car.getY());
-
-        car.setDirection(Direction.S);
-        carController.executeCarCommand(car, 'F', 10, 10);
-        assertEquals(3, car.getX());
-        assertEquals(2, car.getY());
-
-        car.setDirection(Direction.N);
-        carController.executeCarCommand(car, 'F', 10, 10);
-        assertEquals(3, car.getX());
-        assertEquals(3, car.getY());
+        assertEquals(4, car.getY());
+        assertEquals(Direction.E, car.getDirection());
     }
 
     @Test
-    void testMoveForwardBoundsX() {
-        Car car = new Car("TestCar", 9, 0, Direction.E, "F");
-        carController.executeCarCommand(car, 'F', 10, 10);
-        assertEquals(9, car.getX());
-
-        car.setX(0);
-        car.setDirection(Direction.W);
-        carController.executeCarCommand(car, 'F', 10, 10);
-        assertEquals(0, car.getX());
+    void testMoveForwardFromWest() {
+        Car car = new Car("TestCar", 2, 4, Direction.W, new Command[]{Command.F});
+        carController.executeCarCommand(car, Command.F);
+        assertEquals(1, car.getX());
+        assertEquals(4, car.getY());
+        assertEquals(Direction.W, car.getDirection());
     }
 
     @Test
-    void testMoveForwardBoundsY() {
-        Car car = new Car("TestCar", 0, 0, Direction.S, "F");
-
-        carController.executeCarCommand(car, 'F', 10, 10);
-        assertEquals(0, car.getY());
-
-        car.setY(9);
-        car.setDirection(Direction.N);
+    void testMoveForwardFromNorthStaysAtSamePlace() {
+        Car car = new Car("TestCar", 1, 9, Direction.N, new Command[]{Command.F});
+        carController.executeCarCommand(car, Command.F);
+        assertEquals(1, car.getX());
         assertEquals(9, car.getY());
+        assertEquals(Direction.N, car.getDirection());
+    }
+
+    @Test
+    void testMoveForwardFromSouthStaysAtSamePlace() {
+        Car car = new Car("TestCar", 1, 0, Direction.S, new Command[]{Command.F});
+        carController.executeCarCommand(car, Command.F);
+        assertEquals(1, car.getX());
+        assertEquals(0, car.getY());
+        assertEquals(Direction.S, car.getDirection());
+    }
+
+    @Test
+    void testMoveForwardFromEastStaysAtSamePlace() {
+        Car car = new Car("TestCar", 9, 4, Direction.E, new Command[]{Command.F});
+        carController.executeCarCommand(car, Command.F);
+        assertEquals(9, car.getX());
+        assertEquals(4, car.getY());
+        assertEquals(Direction.E, car.getDirection());
+    }
+
+    @Test
+    void testMoveForwardFromWestStayAtSamePlace() {
+        Car car = new Car("TestCar", 0, 4, Direction.W, new Command[]{Command.F});
+        carController.executeCarCommand(car, Command.F);
+        assertEquals(0, car.getX());
+        assertEquals(4, car.getY());
+        assertEquals(Direction.W, car.getDirection());
     }
 }

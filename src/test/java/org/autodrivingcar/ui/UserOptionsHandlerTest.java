@@ -1,8 +1,11 @@
 package org.autodrivingcar.ui;
 
-import org.autodrivingcar.simulation.CarManager;
-import org.autodrivingcar.ui.inputhandler.CarInputHandler;
-import org.autodrivingcar.ui.inputhandler.FieldInputHandler;
+import org.autodrivingcar.model.Command;
+import org.autodrivingcar.simulation.SimulationManager;
+import org.autodrivingcar.model.Car;
+import org.autodrivingcar.model.Direction;
+import org.autodrivingcar.utils.StringFormatter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -13,65 +16,120 @@ import java.util.Scanner;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserOptionsHandlerTest {
+    private ByteArrayOutputStream outputStream;
+    private PrintStream printStream;
+    private SimulationManager testSimulationManager;
+
+    @BeforeEach
+    public void setUp() {
+        outputStream = new ByteArrayOutputStream();
+        printStream = new PrintStream(outputStream);
+        testSimulationManager = new SimulationManager(printStream);
+        testSimulationManager.clearCars();
+    }
 
     @Test
-    public void testAddCarToField() {
-        String input = "5 5\n1\nTestCar\n0 0 N\nL\n2\n2\n";
-        ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
-        System.setIn(in);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
-
-        Scanner scanner = new Scanner(System.in);
-        CarManager carManager = new CarManager();
-        UserOptionsHandler userOptionsHandler = new UserOptionsHandler(carManager, scanner);
-
-        userOptionsHandler.fieldInputHandler = new FieldInputHandler(scanner);
-        userOptionsHandler.carInputHandler = new CarInputHandler(scanner);
+    public void testStartConfiguresTheField() {
+        String input = "10 20\n1\nTestCar\n5\n6\nN\nFFR\n2\n2\n";
+        UserOptionsHandler userOptionsHandler = new UserOptionsHandler(
+                testSimulationManager, generateScanner(input), new PrintStream(outputStream));
 
         userOptionsHandler.start();
 
-        String expectedOutput = """
-                Welcome to Auto Driving Car Simulation!
-                Please enter the width and height of the simulation field in x y format:\s
-
-                You have created a field of 5 x 5.
-
-                Please choose from the following options:
-                [1] Add a car to field
-                [2] Run simulation
-                Please enter the name of the car:
-                Please enter initial position of car TestCar in x y Direction format:
-                Please enter the commands for car TestCar:
-
-                Your current list of cars are:
-                - TestCar, (0,0) N, L
-
-                Please choose from the following options:
-                [1] Add a car to field
-                [2] Run simulation
-
-                Your current list of cars are:
-                - TestCar, (0,0) N, L
-
-
-                After simulation, the result is:
-                - TestCar, (0,0) W
-
-                Please choose from the following options:
-                [1] Start over
-                [2] Exit
-                Thank you for running the simulation. Goodbye!
-                """;
-
-        String actualOutput = outputStream.toString().strip().replaceAll("\\s+", " ");
-        expectedOutput = expectedOutput.strip().replaceAll("\\s+", " ");
-
-        assertEquals(expectedOutput, actualOutput);
-
-        scanner.close();
+        assertEquals(10, testSimulationManager.getFieldWidth());
+        assertEquals(20, testSimulationManager.getFieldHeight());
     }
 
+    @Test
+    public void testHandleUserChoiceToAddCar() {
+        String input = "10 20\n1\nTestCar\n1 2 N\nFFR\n2\n2\n";
+        UserOptionsHandler userOptionsHandler = new UserOptionsHandler(
+                testSimulationManager, generateScanner(input), new PrintStream(outputStream));
+
+        userOptionsHandler.start();
+
+        assertEquals(1, testSimulationManager.getCars().size());
+
+        Car addedCar = testSimulationManager.getCars().getFirst();
+        assertEquals("TestCar", addedCar.getCarName());
+        assertEquals(1, addedCar.getX());
+        assertEquals(Command.F, addedCar.getCommands()[0]);
+        assertEquals(Command.R, addedCar.getCommands()[2]);
+    }
+
+    @Test
+    public void testHandleUserChoiceToRunSimulation() {
+        String input = "10 20\n1\nTestCar\n1\n2\nN\nFR\n2\n2\n";
+        UserOptionsHandler userOptionsHandler = new UserOptionsHandler(
+                testSimulationManager, generateScanner(input), new PrintStream(outputStream));
+
+        userOptionsHandler.start();
+
+        assertEquals(1, testSimulationManager.getCars().size());
+
+        Car afterSimulation = testSimulationManager.getCars().getFirst();
+        assertEquals("TestCar", afterSimulation.getCarName());
+        assertEquals(1, afterSimulation.getX());
+        assertEquals(3, afterSimulation.getY());
+        assertEquals(Direction.E, afterSimulation.getDirection());
+
+    }
+
+    @Test
+    public void testHandleInvalidUserChoice() {
+        UserOptionsHandler userOptionsHandler = new UserOptionsHandler(testSimulationManager, generateScanner("\n"), printStream);
+        userOptionsHandler.handleUserChoice(3);
+
+        String expectedOutput = "Invalid option. Please try again.";
+        assertEquals(expectedOutput, outputStream.toString().strip());
+    }
+
+    @Test
+    public void testHandleUserChoiceToStartOver() {
+        String input = "10 20\n1\nTestCar\n1 2 N\nFFR\n2\n1\n1\nTestCar2\n3 4 W\nRF\n2\n2\n";
+        UserOptionsHandler userOptionsHandler = new UserOptionsHandler(
+                testSimulationManager, generateScanner(input), new PrintStream(outputStream));
+
+        userOptionsHandler.start();
+
+        assertEquals(1, testSimulationManager.getCars().size());
+
+        Car addedCar = testSimulationManager.getCars().getFirst();
+        assertEquals("TestCar2", addedCar.getCarName());
+        assertEquals(3, addedCar.getX());
+        assertEquals(Command.R, addedCar.getCommands()[0]);
+        assertEquals(Command.F, addedCar.getCommands()[1]);
+    }
+
+    @Test
+    public void testHandleUserChoiceToExitApplication() {
+        String input = "10 20\n1\nTestCar\n1\n2\nN\nFFR\n2\n2\n";
+        UserOptionsHandler userOptionsHandler = new UserOptionsHandler(
+                testSimulationManager, generateScanner(input), new PrintStream(outputStream));
+
+        userOptionsHandler.start();
+
+        String expectedOutput = "Thank you for running the simulation. Goodbye!";
+        String actualOutput = outputStream.toString().strip();
+        assertTrue(actualOutput.contains(expectedOutput));
+    }
+
+    @Test
+    public void testHandleInvalidUserChoiceAfterSimulation() {
+        String input = "\n5\n";
+        UserOptionsHandler userOptionsHandler = new UserOptionsHandler(
+                testSimulationManager, generateScanner(input), new PrintStream(outputStream));
+
+        userOptionsHandler.handleUserChoiceAfterSimulation();
+
+        String expectedOutput = "Invalid option. Please try again.";
+        String actualOutput = outputStream.toString().strip();
+        assertTrue(actualOutput.contains(expectedOutput));
+    }
+
+    private Scanner generateScanner(String input) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes());
+        return new Scanner(inputStream);
+    }
 
 }

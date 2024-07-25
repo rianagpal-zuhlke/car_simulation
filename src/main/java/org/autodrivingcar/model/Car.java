@@ -1,12 +1,12 @@
 package org.autodrivingcar.model;
 
 public class Car {
-    private String carName;
+    private final String carName;
     private int x, y;
     private Direction direction;
-    private String commands;
+    private final Command[] commands;
 
-    public Car(String carName, int x, int y, Direction direction, String commands) {
+    public Car(String carName, int x, int y, Direction direction, Command[] commands) {
         this.carName = carName;
         this.x = x;
         this.y = y;
@@ -16,10 +16,6 @@ public class Car {
 
     public String getCarName() {
         return carName;
-    }
-
-    public void setCarName(String carName) {
-        this.carName = carName;
     }
 
     public int getX() {
@@ -46,12 +42,8 @@ public class Car {
         this.direction = direction;
     }
 
-    public String getCommands() {
+    public Command[] getCommands() {
         return commands;
-    }
-
-    public void setCommands(String commands) {
-        this.commands = commands;
     }
 }
 

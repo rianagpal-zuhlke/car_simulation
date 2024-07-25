@@ -1,76 +1,72 @@
 package org.autodrivingcar.ui;
 
-import org.autodrivingcar.model.Field;
-import org.autodrivingcar.simulation.CarManager;
-import org.autodrivingcar.simulation.CarSimulationRunner;
-import org.autodrivingcar.ui.inputhandler.CarInputHandler;
-import org.autodrivingcar.ui.inputhandler.FieldInputHandler;
+import org.autodrivingcar.simulation.SimulationManager;
+import org.autodrivingcar.ui.printer.UserOptionsPrinter;
 
+import java.io.PrintStream;
 import java.util.Scanner;
 
 public class UserOptionsHandler {
 
-    private final CarManager carManager;
+    private final SimulationManager simulationManager;
     private final Scanner scanner;
-    FieldInputHandler fieldInputHandler;
-    CarInputHandler carInputHandler;
-    private Field field;
+    private final CarOptionsHandler carOptionsHandler;
+    private final UserOptionsPrinter userOptionsPrinter;
+
     private boolean exitApplication = false;
 
-    public UserOptionsHandler(CarManager carManager, Scanner scanner) {
-        this.carManager = carManager;
+    public UserOptionsHandler(SimulationManager simulationManager, Scanner scanner, PrintStream out) {
+        this.simulationManager = simulationManager;
         this.scanner = scanner;
-        this.fieldInputHandler = new FieldInputHandler(scanner);
-        this.carInputHandler = new CarInputHandler(scanner);
+        this.carOptionsHandler = new CarOptionsHandler(scanner, out);
+        this.userOptionsPrinter = new UserOptionsPrinter(out);
     }
 
     public void start() {
-        field = fieldInputHandler.configureField();
+        carOptionsHandler.configureField(simulationManager);
 
         while (!exitApplication) {
-            int choice = getUserChoiceBeforeSimulation();
-            handleUserChoice(choice);
+            userOptionsPrinter.printUserChoiceBeforeSimulation();
+            handleUserChoice(scanner.nextInt());
         }
-    }
-
-    public int getUserChoiceBeforeSimulation() {
-        System.out.println("Please choose from the following options:");
-        System.out.println("[1] Add a car to field");
-        System.out.println("[2] Run simulation");
-
-        return scanner.nextInt();
-    }
-
-    public int getUserChoiceAfterSimulation() {
-        System.out.println("\nPlease choose from the following options:");
-        System.out.println("[1] Start over");
-        System.out.println("[2] Exit");
-
-        return scanner.nextInt();
     }
 
     public void handleUserChoice(int choice) {
         if (choice == 1) {
-            carManager.addCar(carInputHandler.createNewCar());
-            carManager.printCarsList();
+            addNewCar();
         } else if (choice == 2) {
-            carManager.printCarsList();
-            new CarSimulationRunner().runCarSimulation(carManager, field);
+            runSimulation();
             handleUserChoiceAfterSimulation();
         } else {
-            System.out.println("Invalid option. Please try again.");
+            userOptionsPrinter.printInvalidChoiceMessage();
         }
     }
 
     public void handleUserChoiceAfterSimulation() {
-        int userChoice = getUserChoiceAfterSimulation();
-        if (userChoice == 1) {
-            carManager.clearCars();
-        } else if (userChoice == 2) {
-            System.out.println("Thank you for running the simulation. Goodbye!");
-            exitApplication = true;
+        userOptionsPrinter.printUserChoiceAfterSimulation();
+        int userChoiceAfterSimulation = scanner.nextInt();
+
+        if (userChoiceAfterSimulation == 1) {
+            simulationManager.clearCars();
+        } else if (userChoiceAfterSimulation == 2) {
+            exitApplication();
         } else {
-            System.out.println("Invalid option. Please try again.");
+            userOptionsPrinter.printInvalidChoiceMessage();
         }
+    }
+
+    private void addNewCar() {
+        simulationManager.addCar(carOptionsHandler.configureNewCar());
+        simulationManager.printCarsList();
+    }
+
+    private void runSimulation() {
+        simulationManager.printCarsList();
+        simulationManager.runCarSimulation();
+    }
+
+    private void exitApplication() {
+        userOptionsPrinter.printApplicationExitMessage();
+        exitApplication = true;
     }
 }

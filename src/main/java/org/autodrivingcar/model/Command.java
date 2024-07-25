@@ -1,2 +1,5 @@
-package org.autodrivingcar.model;public class Command {
+package org.autodrivingcar.model;
+
+public enum Command {
+    F, L, R
 }

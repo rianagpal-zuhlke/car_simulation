@@ -3,15 +3,21 @@ package org.autodrivingcar.simulation;
 import org.autodrivingcar.model.Car;
 import org.autodrivingcar.ui.printer.CarPrinter;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
-public class CarManager {
+public class SimulationManager {
     private final List<Car> cars = new ArrayList<>();
     private int fieldWidth;
     private int fieldHeight;
-    private final static CarPrinter carPrinter = new CarPrinter();
+    private final CarSimulationRunner carSimulationRunner;
+    private final CarPrinter carPrinter;
+
+    public SimulationManager(PrintStream out) {
+        this.carPrinter = new CarPrinter(out);
+        this.carSimulationRunner = new CarSimulationRunner(out);
+    }
 
     public void addCar(Car car) {
         cars.add(car);
@@ -30,7 +36,7 @@ public class CarManager {
     }
 
     public void printCarsList() {
-        carPrinter.print(cars);
+        carPrinter.printCarList(cars);
     }
 
     public void clearCars() {
@@ -42,7 +48,7 @@ public class CarManager {
         this.fieldHeight = fieldHeight;
     }
 
-    public void configureField(Scanner scanner) {
-        carPrinter.configureField(this, scanner);
+    public void runCarSimulation() {
+        carSimulationRunner.runCarSimulation(this);
     }
 }

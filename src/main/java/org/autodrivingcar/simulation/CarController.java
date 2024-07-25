@@ -1,9 +1,18 @@
 package org.autodrivingcar.simulation;
 
 import org.autodrivingcar.model.Car;
+import org.autodrivingcar.model.Command;
 import org.autodrivingcar.model.Direction;
 
 public class CarController {
+    private final int fieldWidth;
+    private final int fieldHeight;
+
+    public CarController(int fieldWidth, int fieldHeight) {
+        this.fieldWidth = fieldWidth;
+        this.fieldHeight = fieldHeight;
+    }
+
     private void rotateLeft(Car car) {
         switch (car.getDirection()) {
             case N:
@@ -38,7 +47,7 @@ public class CarController {
         }
     }
 
-    private void moveForward(Car car, int fieldWidth, int fieldHeight) {
+    private void moveForward(Car car) {
 
         int carX = car.getX();
         int carY = car.getY();
@@ -63,16 +72,16 @@ public class CarController {
         }
     }
 
-    public boolean executeCarCommand(Car car, char command, int fieldWidth, int fieldHeight) {
+    public boolean executeCarCommand(Car car, Command command) {
         switch (command) {
-            case 'L':
+            case Command.L:
                 rotateLeft(car);
                 break;
-            case 'R':
+            case Command.R:
                 rotateRight(car);
                 break;
-            case 'F':
-                moveForward(car, fieldWidth, fieldHeight);
+            case Command.F:
+                moveForward(car);
                 break;
         }
         return true;
